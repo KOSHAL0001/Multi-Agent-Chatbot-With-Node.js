@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Multi-Agent AI Dashboard</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f172a;
+            color: #111827;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .sidebar {
+            width: 270px;
+            background: #111827;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 22px 16px;
+            border-right: 1px solid #1f2937;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px 25px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: white;
+            color: #111827;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .logo-text h2 {
+            font-size: 17px;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 3px;
+        }
+
+        /* =========================
+           NEW CHAT
+        ========================== */
+
+        .new-chat {
+            width: 100%;
+            padding: 13px;
+            border-radius: 10px;
+            border: 1px solid #374151;
+            background: #1f2937;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 22px;
+            transition: 0.2s;
+        }
+
+        .new-chat:hover {
+            background: #374151;
+        }
+
+        /* =========================
+           SIDEBAR TITLE
+        ========================== */
+
+        .sidebar-title {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 5px 10px 12px;
+        }
+
+        /* =========================
+           HISTORY
+        ========================== */
+
+        .history {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .history::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .history::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 10px;
+        }
+
+        .history-item {
+            padding: 11px 10px;
+            border-radius: 9px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            color: #d1d5db;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: 0.2s;
+        }
+
+        .history-item:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .history-item.active {
+            background: #1f2937;
+            color: white;
+        }
+
+        .empty-history {
+            color: #6b7280;
+            font-size: 12px;
+            padding: 10px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           AGENTS
+        ========================== */
+
+        .agents-section {
+            border-top: 1px solid #1f2937;
+            padding-top: 16px;
+            margin-top: 12px;
+        }
+
+        .agents {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .agent {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 9px;
+        }
+
+        .agent-icon {
+            width: 31px;
+            height: 31px;
+            border-radius: 8px;
+            background: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .agent-info {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-size: 12px;
+            color: #f9fafb;
+        }
+
+        .agent-status {
+            font-size: 9px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .online-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .sidebar-bottom {
+            padding: 13px 10px 0;
+            margin-top: 12px;
+            border-top: 1px solid #1f2937;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .main {
+            flex: 1;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* =========================
+           TOP BAR
+        ========================== */
+
+        .topbar {
+            height: 72px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+        }
+
+        .topbar-left h1 {
+            font-size: 20px;
+            color: #111827;
+        }
+
+        .topbar-left p {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 13px;
+            border-radius: 20px;
+            background: #f0fdf4;
+            color: #166534;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+
+        /* =========================
+           CHAT
+        ========================== */
+
+        .chat-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 22px 28px 20px;
+            min-height: 0;
+        }
+
+        .chat-box {
+            flex: 1;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* =========================
+           WELCOME
+        ========================== */
+
+        .welcome {
+            text-align: center;
+            max-width: 650px;
+            margin: 45px auto;
+        }
+
+        .welcome-icon {
+            width: 65px;
+            height: 65px;
+            margin: auto;
+            border-radius: 18px;
+            background: #111827;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .welcome h2 {
+            margin-top: 18px;
+            font-size: 25px;
+            color: #111827;
+        }
+
+        .welcome p {
+            margin-top: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .quick-btn {
+            padding: 14px 10px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #111827;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            transform: translateY(-2px);
+        }
+
+        /* =========================
+           MESSAGES
+        ========================== */
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: messageAppear 0.25s ease;
+        }
+
+        @keyframes messageAppear {
+
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        .message-content {
+            max-width: 75%;
+        }
+
+        .message-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .message-text {
+            padding: 13px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 14px;
+            color: #111827;
+            word-wrap: break-word;
+        }
+
+        /* USER */
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            text-align: right;
+        }
+
+        .user-message .message-text {
+            background: #111827;
+            color: white;
+            border-bottom-right-radius: 4px;
+            white-space: pre-wrap;
+        }
+
+        /* AI */
+
+        .ai-message {
+            justify-content: flex-start;
+        }
+
+        .ai-message .message-text {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            color: #111827;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* =========================
+           CODE
+        ========================== */
+
+        .code-block {
+            background: #111827;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: left;
+            white-space: pre;
+        }
+
+        .code-block code {
+            font-family: inherit;
+            color: #f9fafb;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            color: #111827;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+        }
+
+        .message-text strong {
+            color: #111827;
+            font-weight: 700;
+        }
+
+        /* =========================
+           TYPING
+        ========================== */
+
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .typing span {
+            width: 6px;
+            height: 6px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: typing 1.2s infinite;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-5px);
+            }
+
+        }
+
+        /* =========================
+           INPUT
+        ========================== */
+
+        .input-section {
+            margin-top: 14px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: black;
+            background: white;
+        }
+
+        #messageInput::placeholder {
+            color: #9ca3af;
+        }
+
+        #sendButton {
+            border: none;
+            background: #111827;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        #sendButton:hover {
+            background: #374151;
+        }
+
+        #sendButton:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           SCROLLBAR
+        ========================== */
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================== */
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                width: 75px;
+                padding: 15px 10px;
+            }
+
+            .logo-text,
+            .sidebar-title,
+            .agent-info,
+            .sidebar-bottom,
+            .history {
+                display: none;
+            }
+
+            .logo {
+                justify-content: center;
+            }
+
+            .new-chat {
+                font-size: 0;
+                padding: 12px;
+            }
+
+            .new-chat::after {
+                content: "+";
+                font-size: 20px;
+            }
+
+            .agent {
+                justify-content: center;
+            }
+
+            .online-dot {
+                display: none;
+            }
+
+            .chat-wrapper {
+                padding: 15px;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .topbar-left h1 {
+                font-size: 17px;
+            }
+
+            .status {
+                display: none;
+            }
+
+            .chat-box {
+                padding: 15px;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                🤖
+            </div>
+
+            <div class="logo-text">
+
+                <h2>AI Assistant</h2>
+
+                <p>
+                    Multi-Agent System
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="new-chat"
+            onclick="newChat()">
+
+            ＋ New Chat
+
+        </button>
+
+
+        <div class="sidebar-title">
+            Chat History
+        </div>
+
+
+        <div
+            class="history"
+            id="historyList">
+        </div>
+
+
+        <!-- =========================
+             AGENTS
+        ========================== -->
+
+        <div class="agents-section">
+
+            <div class="sidebar-title">
+                AI Agents
+            </div>
+
+
+            <div class="agents">
+
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        💻
+                    </div>
+
+                    <div class="agent-info">
+
+                        <div class="agent-name">
+                            Coding Agent
+                        </div>
+
+                        <div class="agent-status">
+                            Programming & DSA
+                        </div>
+
+                    </div>
+
+                    <div class="online-dot"></div>
+
+                </div>
+
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        💼
+                    </div>
+
+                    <div class="agent-info">
+
+                        <div class="agent-name">
+                            Career Agent
+                        </div>
+
+                        <div class="agent-status">
+                            Jobs & Interviews
+                        </div>
+
+                    </div>
+
+                    <div class="online-dot"></div>
+
+                </div>
+
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        📄
+                    </div>
+
+                    <div class="agent-info">
+
+                        <div class="agent-name">
+                            Resume Agent
+                        </div>
+
+                        <div class="agent-status">
+                            Resume & ATS
+                        </div>
+
+                    </div>
+
+                    <div class="online-dot"></div>
+
+                </div>
+
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        🌐
+                    </div>
+
+                    <div class="agent-info">
+
+                        <div class="agent-name">
+                            General Agent
+                        </div>
+
+                        <div class="agent-status">
+                            General Questions
+                        </div>
+
+                    </div>
+
+                    <div class="online-dot"></div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="system-status">
+
+                <span class="online-dot"></span>
+
+                All systems operational
+
+            </div>
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <h1>
+                    Multi-Agent Chatbot
+                </h1>
+
+                <p>
+                    Intelligent routing powered by AI
+                </p>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                AI Online
+
+            </div>
+
+        </header>
+
+
+
+        <section class="chat-wrapper">
+
+
+            <div
+                class="chat-box"
+                id="chatBox">
+            </div>
+
+
+            <form
+                class="input-section"
+                id="chatForm">
+
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Ask something..."
+                    autocomplete="off"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    id="sendButton">
+
+                    Send ➤
+
+                </button>
+
+
+            </form>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<script>
+
+
+    /* =========================
+       ELEMENTS
+    ========================== */
+
+    const chatForm =
+        document.getElementById("chatForm");
+
+    const messageInput =
+        document.getElementById("messageInput");
+
+    const chatBox =
+        document.getElementById("chatBox");
+
+    const sendButton =
+        document.getElementById("sendButton");
+
+    const historyList =
+        document.getElementById("historyList");
+
+
+    /* =========================
+       CHAT STATE
+    ========================== */
+
+    let currentChatId = null;
+
+    let currentMessages = [];
+
+
+    /* =========================
+       MAXIMUM CHAT HISTORY
+    ========================== */
+
+    const MAX_CHATS = 5;
+
+
+    /* =========================
+       STORAGE KEY
+    ========================== */
+
+    const STORAGE_KEY =
+        "multiAgentChatHistory";
+
+
+    /* =========================
+       GET HISTORY
+    ========================== */
+
+    function getHistory() {
+
+        try {
+
+            return JSON.parse(
+                localStorage.getItem(STORAGE_KEY)
+            ) || [];
+
+        } catch (error) {
+
+            console.error(
+                "Could not read chat history:",
+                error
+            );
+
+            return [];
+
+        }
+
+    }
+
+
+    /* =========================
+       SAVE HISTORY
+    ========================== */
+
+    function saveHistory(history) {
+
+        try {
+
+            /*
+             * Keep only latest 5 chats.
+             */
+
+            history =
+                history.slice(0, MAX_CHATS);
+
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(history)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Could not save chat history:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================
+       FORMAT AI RESPONSE
+    ========================== */
+
+    function formatAIResponse(text) {
+
+        let formatted = text;
+
+
+        /* Escape HTML */
+
+        formatted = formatted
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+
+        /* Code blocks */
+
+        formatted = formatted.replace(
+            /```(?:[a-zA-Z0-9_+-]+)?\n?([\s\S]*?)```/g,
+            '<pre class="code-block"><code>$1</code></pre>'
+        );
+
+
+        /* Bold */
+
+        formatted = formatted.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
+
+
+        /* Inline code */
+
+        formatted = formatted.replace(
+            /`([^`]+)`/g,
+            '<code class="inline-code">$1</code>'
+        );
+
+
+        /* New lines */
+
+        formatted = formatted.replace(
+            /\n/g,
+            "<br>"
+        );
+
+
+        return formatted;
+
+    }
+
+
+    /* =========================
+       ADD MESSAGE
+    ========================== */
+
+    function addMessage(
+        text,
+        type,
+        agent = null,
+        save = true
+    ) {
+
+
+        const message =
+            document.createElement("div");
+
+
+        message.classList.add(
+            "message",
+            type === "user"
+                ? "user-message"
+                : "ai-message"
+        );
+
+
+        const content =
+            document.createElement("div");
+
+
+        content.classList.add(
+            "message-content"
+        );
+
+
+        const label =
+            document.createElement("div");
+
+
+        label.classList.add(
+            "message-label"
+        );
+
+
+        if (type === "user") {
+
+            label.textContent =
+                "You";
+
+        } else {
+
+            const agentNames = {
+
+                coding:
+                    "💻 Coding Agent",
+
+                career:
+                    "💼 Career Agent",
+
+                resume:
+                    "📄 Resume Agent",
+
+                general:
+                    "🌐 General Agent"
+
+            };
+
+
+            label.textContent =
+                agentNames[agent]
+                || "🤖 AI Assistant";
+
+        }
+
+
+        const messageText =
+            document.createElement("div");
+
+
+        messageText.classList.add(
+            "message-text"
+        );
+
+
+        if (type === "user") {
+
+            messageText.textContent =
+                text;
+
+        } else {
+
+            messageText.innerHTML =
+                formatAIResponse(text);
+
+        }
+
+
+        content.appendChild(label);
+
+        content.appendChild(messageText);
+
+        message.appendChild(content);
+
+        chatBox.appendChild(message);
+
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+
+        /* Save to current conversation */
+
+        if (save) {
+
+            currentMessages.push({
+
+                role: type,
+
+                content: text,
+
+                agent: agent
+
+            });
+
+        }
+
+    }
+
+
+    /* =========================
+       WELCOME SCREEN
+    ========================== */
+
+    function showWelcome() {
+
+        chatBox.innerHTML = `
+
+            <div
+                class="welcome"
+                id="welcomeScreen">
+
+                <div class="welcome-icon">
+                    🤖
+                </div>
+
+                <h2>
+                    How can I help you today?
+                </h2>
+
+                <p>
+                    Ask anything. I'll automatically
+                    route your question to the right
+                    AI agent.
+                </p>
+
+                <div class="quick-actions">
+
+                    <button
+                        class="quick-btn"
+                        onclick="quickMessage('Explain binary search in Java')">
+
+                        💻 Coding
+
+                    </button>
+
+                    <button
+                        class="quick-btn"
+                        onclick="quickMessage('How should I prepare for an AI internship interview?')">
+
+                        💼 Career
+
+                    </button>
+
+                    <button
+                        class="quick-btn"
+                        onclick="quickMessage('How can I improve my resume for ATS?')">
+
+                        📄 Resume
+
+                    </button>
+
+                    <button
+                        class="quick-btn"
+                        onclick="quickMessage('Explain artificial intelligence in simple words')">
+
+                        🌐 General
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       TYPING INDICATOR
+    ========================== */
+
+    function showTyping() {
+
+
+        const typing =
+            document.createElement("div");
+
+
+        typing.id =
+            "typingMessage";
+
+
+        typing.classList.add(
+            "message",
+            "ai-message"
+        );
+
+
+        const content =
+            document.createElement("div");
+
+
+        content.classList.add(
+            "message-content"
+        );
+
+
+        const label =
+            document.createElement("div");
+
+
+        label.classList.add(
+            "message-label"
+        );
+
+
+        label.textContent =
+            "🤖 AI Assistant";
+
+
+        const text =
+            document.createElement("div");
+
+
+        text.classList.add(
+            "message-text",
+            "typing"
+        );
+
+
+        text.innerHTML = `
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        `;
+
+
+        content.appendChild(label);
+
+        content.appendChild(text);
+
+        typing.appendChild(content);
+
+        chatBox.appendChild(typing);
+
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+    }
+
+
+    /* =========================
+       REMOVE TYPING
+    ========================== */
+
+    function removeTyping() {
+
+        const typing =
+            document.getElementById(
+                "typingMessage"
+            );
+
+
+        if (typing) {
+
+            typing.remove();
+
+        }
+
+    }
+
+
+    /* =========================
+       CREATE NEW CHAT OBJECT
+    ========================== */
+
+    function createChat() {
+
+        return {
+
+            id:
+                Date.now().toString(),
+
+            title:
+                "New Chat",
+
+            messages:
+                [],
+
+            createdAt:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    /* =========================
+       SAVE CURRENT CHAT
+    ========================== */
+
+    function saveCurrentChat() {
+
+
+        if (
+            !currentChatId ||
+            currentMessages.length === 0
+        ) {
+
+            return;
+
+        }
+
+
+        let history =
+            getHistory();
+
+
+        const existingIndex =
+            history.findIndex(
+                chat =>
+                    chat.id === currentChatId
+            );
+
+
+        const firstUserMessage =
+            currentMessages.find(
+                message =>
+                    message.role === "user"
+            );
+
+
+        let title =
+            firstUserMessage
+                ? firstUserMessage.content
+                : "New Chat";
+
+
+        /* Limit title */
+
+        if (title.length > 35) {
+
+            title =
+                title.substring(0, 35)
+                + "...";
+
+        }
+
+
+        const chat = {
+
+            id:
+                currentChatId,
+
+            title:
+                title,
+
+            messages:
+                currentMessages,
+
+            createdAt:
+                existingIndex >= 0
+                    ? history[existingIndex].createdAt
+                    : new Date().toISOString()
+
+        };
+
+
+        if (existingIndex >= 0) {
+
+            history[existingIndex] =
+                chat;
+
+        } else {
+
+            /*
+             * Newest chat goes first.
+             */
+
+            history.unshift(chat);
+
+        }
+
+
+        /*
+         * Keep only latest 5 chats.
+         *
+         * If Chat 6 is created,
+         * Chat 1 is automatically removed.
+         */
+
+        if (history.length > MAX_CHATS) {
+
+            history =
+                history.slice(0, MAX_CHATS);
+
+        }
+
+
+        saveHistory(history);
+
+
+        renderHistory();
+
+    }
+
+
+    /* =========================
+       RENDER HISTORY
+    ========================== */
+
+    function renderHistory() {
+
+
+        const history =
+            getHistory();
+
+
+        historyList.innerHTML = "";
+
+
+        if (history.length === 0) {
+
+            historyList.innerHTML = `
+
+                <div class="empty-history">
+
+                    No conversations yet.<br>
+                    Start a new chat!
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        history.forEach(chat => {
+
+
+            const item =
+                document.createElement("div");
+
+
+            item.classList.add(
+                "history-item"
+            );
+
+
+            if (
+                chat.id === currentChatId
+            ) {
+
+                item.classList.add(
+                    "active"
+                );
+
+            }
+
+
+            item.textContent =
+                "💬 " + chat.title;
+
+
+            item.title =
+                chat.title;
+
+
+            item.addEventListener(
+                "click",
+                () => loadChat(chat.id)
+            );
+
+
+            historyList.appendChild(
+                item
+            );
+
+        });
+
+    }
+
+
+    /* =========================
+       LOAD OLD CHAT
+    ========================== */
+
+    function loadChat(chatId) {
+
+
+        const history =
+            getHistory();
+
+
+        const chat =
+            history.find(
+                item =>
+                    item.id === chatId
+            );
+
+
+        if (!chat) {
+
+            return;
+
+        }
+
+
+        currentChatId =
+            chat.id;
+
+
+        currentMessages =
+            [...chat.messages];
+
+
+        chatBox.innerHTML = "";
+
+
+        currentMessages.forEach(
+            message => {
+
+                addMessage(
+
+                    message.content,
+
+                    message.role,
+
+                    message.agent,
+
+                    false
+
+                );
+
+            }
+        );
+
+
+        renderHistory();
+
+
+        messageInput.focus();
+
+    }
+
+
+    /* =========================
+       NEW CHAT
+    ========================== */
+
+    function newChat() {
+
+
+        /*
+         * Save current chat first.
+         */
+
+        saveCurrentChat();
+
+
+        /*
+         * Create fresh conversation.
+         */
+
+        const newConversation =
+            createChat();
+
+
+        currentChatId =
+            newConversation.id;
+
+
+        currentMessages =
+            [];
+
+
+        showWelcome();
+
+
+        renderHistory();
+
+
+        messageInput.value = "";
+
+
+        messageInput.focus();
+
+    }
+
+
+    /* =========================
+       SEND MESSAGE
+    ========================== */
+
+    async function sendMessage(message) {
+
+
+        if (!message.trim()) {
+
+            return;
+
+        }
+
+
+        /*
+         * Create chat automatically
+         * when first message is sent.
+         */
+
+        if (!currentChatId) {
+
+            const newConversation =
+                createChat();
+
+
+            currentChatId =
+                newConversation.id;
+
+        }
+
+
+        /*
+         * Remove welcome screen.
+         */
+
+        const welcome =
+            document.getElementById(
+                "welcomeScreen"
+            );
+
+
+        if (welcome) {
+
+            welcome.remove();
+
+        }
+
+
+        /*
+         * Show user message.
+         */
+
+        addMessage(
+            message,
+            "user"
+        );
+
+
+        /*
+         * Clear input.
+         */
+
+        messageInput.value = "";
+
+
+        sendButton.disabled =
+            true;
+
+
+        messageInput.disabled =
+            true;
+
+
+        showTyping();
+
+
+        try {
+
+
+            const response =
+                await fetch(
+                    "http://127.0.0.1:8000/chat",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        
+                        body: JSON.stringify({
+    message: message,
+    history: currentMessages.slice(0, -1)
+})
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Server error: "
+                    + response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            removeTyping();
+
+
+            /*
+             * Add AI response.
+             */
+
+            addMessage(
+
+                data.response,
+
+                "ai",
+
+                data.agent
+
+            );
+
+
+            /*
+             * Save complete conversation.
+             */
+
+            saveCurrentChat();
+
+
+        } catch (error) {
+
+
+            removeTyping();
+
+
+            addMessage(
+
+                "Sorry, something went wrong. " +
+                "Please make sure the FastAPI " +
+                "server is running.",
+
+                "ai",
+
+                "general"
+
+            );
+
+
+            console.error(
+                "Chat error:",
+                error
+            );
+
+
+            /*
+             * Save conversation even if
+             * API response fails.
+             */
+
+            saveCurrentChat();
+
+        } finally {
+
+
+            sendButton.disabled =
+                false;
+
+
+            messageInput.disabled =
+                false;
+
+
+            messageInput.focus();
+
+        }
+
+    }
+
+
+    /* =========================
+       QUICK MESSAGE
+    ========================== */
+
+    function quickMessage(message) {
+
+        sendMessage(message);
+
+    }
+
+
+    /* =========================
+       FORM SUBMIT
+    ========================== */
+
+    chatForm.addEventListener(
+        "submit",
+        function(event) {
+
+
+            event.preventDefault();
+
+
+            const message =
+                messageInput.value.trim();
+
+
+            if (!message) {
+
+                return;
+
+            }
+
+
+            sendMessage(message);
+
+        }
+    );
+
+
+    /* =========================
+       INITIALIZE APPLICATION
+    ========================== */
+
+    function initializeApp() {
+
+
+        const history =
+            getHistory();
+
+
+        /*
+         * If previous chats exist,
+         * load the latest one.
+         */
+
+        if (history.length > 0) {
+
+
+            const latestChat =
+                history[0];
+
+
+            currentChatId =
+                latestChat.id;
+
+
+            currentMessages =
+                [...latestChat.messages];
+
+
+            chatBox.innerHTML = "";
+
+
+            currentMessages.forEach(
+                message => {
+
+                    addMessage(
+
+                        message.content,
+
+                        message.role,
+
+                        message.agent,
+
+                        false
+
+                    );
+
+                }
+            );
+
+
+        } else {
+
+
+            /*
+             * First time user.
+             */
+
+            showWelcome();
+
+        }
+
+
+        renderHistory();
+
+
+        messageInput.focus();
+
+    }
+
+
+    /* =========================
+       START APPLICATION
+    ========================== */
+
+    initializeApp();
+
+
+</script>
+
+
+</body>
+
+</html>
